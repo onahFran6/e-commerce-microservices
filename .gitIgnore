@@ -27,7 +27,12 @@ dist/**/*
 
 
 # Ignore built ts files
-**/test/**/*
+# **/test/**/*
 
 # ignore yarn.lock
 **/yarn.lock
+
+#coverage
+**/coverage/**/*
+/coverage
+coverage
