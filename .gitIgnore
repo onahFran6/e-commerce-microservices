@@ -31,8 +31,13 @@ dist/**/*
 
 # ignore yarn.lock
 **/yarn.lock
+/node_modules
 
 #coverage
 **/coverage/**/*
 /coverage
 coverage
+
+
+#mongo
+ mongo/db/journal

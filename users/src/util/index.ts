@@ -1,7 +1,8 @@
-import bcrypt from "bcrypt";
+import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import config from "../config";
-import { LoginAndsignupUserReturnType } from "userType";
+import { ReqUserType } from "index";
+// import { LoginAndsignupUserReturnType, UserDoc } from "userType";
 
 const JWT_SECRET = config.JWT_SECRET_KEY;
 
@@ -36,13 +37,36 @@ export const GenerateUserToken = async ({
   return UserToken;
 };
 
-export const FormatData = (data: {
-  id: string;
-  token: string;
-}): LoginAndsignupUserReturnType => {
+// eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/explicit-module-boundary-types
+export const FormatData = (data: any): any => {
   if (data) {
     return { data };
   } else {
     throw new Error("Data Not found!");
+  }
+};
+
+export const verifyAuthorizationToken = async ({
+  req,
+}: {
+  req: ReqUserType;
+}): Promise<boolean> => {
+  try {
+    const authHeader = req.headers.authorization;
+    const token = authHeader.split(" ")[1];
+    console.log(authHeader);
+
+    if (token) {
+      const payload = jwt.verify(token, JWT_SECRET);
+      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+      // @ts-ignore
+      req.payload = payload;
+      return true;
+    } else {
+      return false;
+    }
+  } catch (error) {
+    console.log(error);
+    return false;
   }
 };
