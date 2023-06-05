@@ -1,19 +1,34 @@
 import { Request, Response } from "express";
 import UserService from "../services/userService";
 import { ReqUserType } from "index";
+import { createChannel, subscribeMessage } from "../util/index";
+import { Channel } from "amqplib";
 
 class UserController {
   service: UserService;
+  channel: Channel;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   static mockClear: any;
 
   constructor() {
     this.service = new UserService();
+    this.initChannel();
     this.SignUp = this.SignUp.bind(this);
     this.Login = this.Login.bind(this);
     this.AddNewAddressToUser = this.AddNewAddressToUser.bind(this);
     this.GetUserDetails = this.GetUserDetails.bind(this);
     this.GetUserWishList = this.GetUserWishList.bind(this);
+  }
+
+  async initChannel(): Promise<void> {
+    try {
+      this.channel = await createChannel();
+      if (this.channel) {
+        subscribeMessage({ channel: this.channel, service: this.service });
+      }
+    } catch (error) {
+      console.error("Failed to create channel:", error);
+    }
   }
 
   public async SignUp(req: Request, res: Response): Promise<void> {

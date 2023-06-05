@@ -171,6 +171,47 @@ class UserService {
     const orderResult = await this.repository.AddOrderToUser({ userId, order });
     return FormatData(orderResult);
   }
+
+  // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
+  async SubscribeEvents(payload: any): Promise<void> {
+    const dat = JSON.parse(payload);
+    console.log("Triggering.... Customer Events");
+
+    const { event, data } = dat.data;
+
+    const { userId, product, order, qty } = data;
+
+    switch (event) {
+      case "ADD_TO_WISHLIST":
+      case "REMOVE_FROM_WISHLIST":
+        this.AddWishListItem({ userId, product });
+        break;
+      case "ADD_TO_CART":
+        this.ManageCartItem({
+          userId,
+          product,
+          qty,
+          isRemove: false,
+        });
+        break;
+      case "REMOVE_FROM_CART":
+        this.ManageCartItem({
+          userId,
+          product,
+          qty,
+          isRemove: true,
+        });
+        break;
+      case "CREATE_ORDER":
+        this.ManageOrder({
+          userId,
+          order,
+        });
+        break;
+      default:
+        break;
+    }
+  }
 }
 
 export default UserService;
