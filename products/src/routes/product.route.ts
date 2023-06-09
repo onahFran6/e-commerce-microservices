@@ -15,6 +15,13 @@ router
 router
   .route("/:productId")
   .get(verifyUser, productController.GetProductDescription);
-router.route("/wishlists").put(verifyUser, productController.GetProductPayload);
+router.route("/wishlists").put(verifyUser, productController.AddToWishList);
+router
+  .route("/wishlist/:productId")
+  .delete(verifyUser, productController.RemoveFromWishList);
+router.route("/cart").put(verifyUser, productController.AddToCart);
+router
+  .route("/cart/:productId")
+  .delete(verifyUser, productController.RemoveFromCart);
 
 export default router;

@@ -31,9 +31,9 @@ app.use(
 );
 
 app.get("/", (req: Request, res: Response) => {
-  res.send("welcome");
+  res.send("welcome to user service");
 });
 
-app.use("/api/v1/user", userRouter);
+app.use("/", userRouter);
 
 export default app;

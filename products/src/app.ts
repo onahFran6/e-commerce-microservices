@@ -30,6 +30,6 @@ app.get("/", (req: Request, res: Response) => {
   res.send("welcome to product micro service");
 });
 
-app.use("/api/v1/product", productRouter);
+app.use("/", productRouter);
 
 export default app;

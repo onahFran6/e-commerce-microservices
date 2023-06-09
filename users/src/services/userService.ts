@@ -179,6 +179,8 @@ class UserService {
 
     const { event, data } = dat.data;
 
+    console.log("place order", data);
+
     const { userId, product, order, qty } = data;
 
     switch (event) {

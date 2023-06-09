@@ -9,6 +9,7 @@ class ProductController {
   service: ProductService;
   channel: Channel;
   USER_SERVICE: string;
+  SHOPPING_SERVICE: string;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   static mockClear: any;
 
@@ -18,8 +19,12 @@ class ProductController {
     this.GetProducts = this.GetProducts.bind(this);
     this.GetProductsByCategory = this.GetProductsByCategory.bind(this);
     this.GetProductDescription = this.GetProductDescription.bind(this);
-    this.GetProductPayload = this.GetProductPayload.bind(this);
+    this.AddToWishList = this.AddToWishList.bind(this);
+    this.RemoveFromWishList = this.RemoveFromWishList.bind(this);
+    this.AddToCart = this.AddToCart.bind(this);
+    this.RemoveFromCart = this.RemoveFromCart.bind(this);
     this.USER_SERVICE = config.USER_SERVICE;
+    this.SHOPPING_SERVICE = config.SHOPPING_SERVICE;
     this.initChannel();
   }
 
@@ -94,10 +99,7 @@ class ProductController {
     }
   }
 
-  public async GetProductPayload(
-    req: ReqUserType,
-    res: Response
-  ): Promise<void> {
+  public async AddToWishList(req: ReqUserType, res: Response): Promise<void> {
     try {
       const { id: userId } = req.payload;
 
@@ -120,6 +122,111 @@ class ProductController {
       });
 
       res.status(200).json(data);
+    } catch (error) {
+      console.log("error", error);
+      res.status(400).json({ error: error.message });
+    }
+  }
+
+  public async RemoveFromWishList(
+    req: ReqUserType,
+    res: Response
+  ): Promise<void> {
+    try {
+      const { id: userId } = req.payload;
+
+      const productId = req.params.productId;
+      const productInfo = {
+        productId: productId,
+      };
+
+      const data = await this.service.GetProductPayload({
+        userId,
+        productInfo,
+        eventType: "REMOVE_TO_WISHLIST",
+      });
+
+      // PublishCustomerEvent(data);
+      publishMessage({
+        channel: this.channel,
+        service: this.USER_SERVICE,
+        msg: JSON.stringify(data),
+      });
+
+      res.status(200).json(data);
+    } catch (error) {
+      console.log("error", error);
+      res.status(400).json({ error: error.message });
+    }
+  }
+
+  public async AddToCart(req: ReqUserType, res: Response): Promise<void> {
+    try {
+      const { id: userId } = req.payload;
+
+      const { productId, qty } = req.body;
+      const productInfo = {
+        productId: productId,
+        qty: qty,
+      };
+
+      const data = await this.service.GetProductPayload({
+        userId,
+        productInfo,
+        eventType: "ADD_TO_CART",
+      });
+
+      // PublishCustomerEvent(data);
+      publishMessage({
+        channel: this.channel,
+        service: this.USER_SERVICE,
+        msg: JSON.stringify(data),
+      });
+      publishMessage({
+        channel: this.channel,
+        service: this.SHOPPING_SERVICE,
+        msg: JSON.stringify(data),
+      });
+
+      const response = { product: data.data.product, unit: data.data.qty };
+
+      res.status(200).json(response);
+    } catch (error) {
+      console.log("error", error);
+      res.status(400).json({ error: error.message });
+    }
+  }
+
+  public async RemoveFromCart(req: ReqUserType, res: Response): Promise<void> {
+    try {
+      const { id: userId } = req.payload;
+
+      const productId = req.params.productId;
+      const productInfo = {
+        productId: productId,
+      };
+
+      const data = await this.service.GetProductPayload({
+        userId,
+        productInfo,
+        eventType: "REMOVE_FROM_CART",
+      });
+
+      // PublishCustomerEvent(data);
+      publishMessage({
+        channel: this.channel,
+        service: this.USER_SERVICE,
+        msg: JSON.stringify(data),
+      });
+      publishMessage({
+        channel: this.channel,
+        service: this.SHOPPING_SERVICE,
+        msg: JSON.stringify(data),
+      });
+
+      const response = { product: data.data.product, unit: data.data.qty };
+
+      res.status(200).json(response);
     } catch (error) {
       console.log("error", error);
       res.status(400).json({ error: error.message });
